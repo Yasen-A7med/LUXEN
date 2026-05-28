@@ -8,7 +8,6 @@ build/
 .nuxt/
 .cache/
 .pnpm-debug.log*
-pnpm-lock.yaml
 .idea/
 .vscode/
 *.suo
