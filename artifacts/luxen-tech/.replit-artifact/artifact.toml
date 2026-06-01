@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Luxen Tech"
+version = "1.0.0"
+id = "artifacts/luxen-tech"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21752
+
+[services.development]
+run = "pnpm --filter @workspace/luxen-tech run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/luxen-tech", "run", "build" ]
+publicDir = "artifacts/luxen-tech/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21752"
+BASE_PATH = "/"
