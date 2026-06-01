@@ -11,10 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Loader2, Trash2, Banknote } from "lucide-react";
+import { Plus, Loader2, Trash2, Banknote, CheckCircle2 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import { useToast } from "@/hooks/use-toast";
-import { getEmployees, getSalaries, saveSalary, deleteSalary } from "@/lib/api";
+import { getEmployees, getSalaries, saveSalary, updateSalaryStatus, deleteSalary } from "@/lib/api";
 
 const payrollSchema = z.object({
   employeeId: z.string().min(1, "الموظف مطلوب"),
@@ -40,6 +40,12 @@ export default function PayrollPage() {
       return saveSalary({ ...data, net });
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["salaries"] }); setIsOpen(false); form.reset(); toast({ title: "تم حفظ الراتب" }); },
+    onError: (e: Error) => toast({ title: e.message, variant: "destructive" }),
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: string }) => updateSalaryStatus(id, status),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["salaries"] }); toast({ title: "تم تحديث حالة الراتب" }); },
     onError: (e: Error) => toast({ title: e.message, variant: "destructive" }),
   });
 
@@ -169,10 +175,26 @@ export default function PayrollPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10"
-                        onClick={() => deleteMutation.mutate(s.id)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        {s.status !== "مدفوع" && (
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-success hover:bg-success/10 text-xs"
+                            onClick={() => statusMutation.mutate({ id: s.id, status: "مدفوع" })}
+                            disabled={statusMutation.isPending}>
+                            <CheckCircle2 className="h-3 w-3 ml-1" /> دفع
+                          </Button>
+                        )}
+                        {s.status === "مدفوع" && (
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground hover:bg-muted text-xs"
+                            onClick={() => statusMutation.mutate({ id: s.id, status: "قيد المراجعة" })}
+                            disabled={statusMutation.isPending}>
+                            إلغاء
+                          </Button>
+                        )}
+                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10"
+                          onClick={() => deleteMutation.mutate(s.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

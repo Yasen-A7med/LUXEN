@@ -5,8 +5,10 @@ import { z } from "zod/v4";
 export const chatMessagesTable = pgTable("chat_messages", {
   id: serial("id").primaryKey(),
   employeeId: text("employee_id").notNull(),
-  message: text("message").notNull(),
+  message: text("message").notNull().default(""),
   isFromAdmin: boolean("is_from_admin").notNull().default(false),
+  mediaType: text("media_type").notNull().default("text"),
+  mediaUrl: text("media_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

@@ -16,10 +16,14 @@ router.get("/chat/:employeeId", async (req, res) => {
 
 router.post("/chat/:employeeId", async (req, res) => {
   try {
-    const { message, isFromAdmin } = req.body;
-    if (!message) return res.status(400).json({ error: "الرسالة مطلوبة" });
+    const { message = "", isFromAdmin, mediaType = "text", mediaUrl } = req.body;
+    if (!message && !mediaUrl) return res.status(400).json({ error: "الرسالة أو المرفق مطلوب" });
     const [created] = await db.insert(chatMessagesTable).values({
-      employeeId: req.params.employeeId, message, isFromAdmin: isFromAdmin ?? false,
+      employeeId: req.params.employeeId,
+      message,
+      isFromAdmin: isFromAdmin ?? false,
+      mediaType,
+      mediaUrl: mediaUrl || null,
     }).returning();
     res.status(201).json(created);
   } catch (e) { req.log.error(e); res.status(500).json({ error: "فشل في إرسال الرسالة" }); }

@@ -32,6 +32,17 @@ router.post("/salaries", async (req, res) => {
   } catch (e) { req.log.error(e); res.status(500).json({ error: "فشل في حفظ الراتب" }); }
 });
 
+router.put("/salaries/:id", async (req, res) => {
+  try {
+    const { status } = req.body;
+    const [updated] = await db.update(salariesTable)
+      .set({ status })
+      .where(eq(salariesTable.id, parseInt(req.params.id))).returning();
+    if (!updated) return res.status(404).json({ error: "السجل غير موجود" });
+    res.json(updated);
+  } catch (e) { req.log.error(e); res.status(500).json({ error: "فشل في التحديث" }); }
+});
+
 router.delete("/salaries/:id", async (req, res) => {
   try {
     await db.delete(salariesTable).where(eq(salariesTable.id, parseInt(req.params.id)));

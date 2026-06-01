@@ -54,6 +54,8 @@ export const getSalaries = (employeeId?: string) =>
   api<Salary[]>(employeeId ? `/salaries?employeeId=${employeeId}` : "/salaries");
 export const saveSalary = (data: Omit<Salary, "id">) =>
   api<Salary>("/salaries", { method: "POST", body: JSON.stringify(data) });
+export const updateSalaryStatus = (id: number, status: string) =>
+  api<Salary>(`/salaries/${id}`, { method: "PUT", body: JSON.stringify({ status }) });
 export const deleteSalary = (id: number) =>
   api<{ success: boolean }>(`/salaries/${id}`, { method: "DELETE" });
 
@@ -87,10 +89,21 @@ export const deleteTask = (id: number) =>
 export interface ChatMsg {
   id: number; employeeId: string; message: string;
   isFromAdmin: boolean; createdAt: string;
+  mediaType: string; mediaUrl?: string | null;
 }
 export const getChat = (employeeId: string) => api<ChatMsg[]>(`/chat/${employeeId}`);
-export const sendChatMessage = (employeeId: string, message: string, isFromAdmin: boolean) =>
-  api<ChatMsg>(`/chat/${employeeId}`, { method: "POST", body: JSON.stringify({ message, isFromAdmin }) });
+export const sendChatMessage = (
+  employeeId: string,
+  message: string,
+  isFromAdmin: boolean,
+  mediaType = "text",
+  mediaUrl?: string,
+) => api<ChatMsg>(`/chat/${employeeId}`, {
+  method: "POST",
+  body: JSON.stringify({ message, isFromAdmin, mediaType, mediaUrl }),
+});
+export const clearChat = (employeeId: string) =>
+  api<{ success: boolean }>(`/chat/${employeeId}`, { method: "DELETE" });
 
 // ── Projects ───────────────────────────────────────────────────
 export interface Project {
